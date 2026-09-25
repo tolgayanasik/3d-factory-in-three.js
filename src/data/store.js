@@ -77,6 +77,7 @@ export class Store extends Emitter {
 
   apply(data, mode, initial = false) {
     const changes = [];
+    const statusChanged = [];
     if (data.settings) {
       for (const [k, v] of Object.entries(data.settings)) {
         if (!initial && this.settings[k] !== v) changes.push({ id: 'Settings', field: k, from: this.settings[k], to: v });
@@ -101,7 +102,7 @@ export class Store extends Emitter {
           it.base[k] = v;
           // sheet edits take effect immediately on the live values
           if (['good', 'scrap', 'energy', 'battery'].includes(k)) it.live[k] = v;
-          if (k === 'status') { it.sim.downUntil = 0; it.sim.reason = null; }
+          if (k === 'status') { it.sim.downUntil = 0; it.sim.reason = null; statusChanged.push(it); }
           if (k === 'battery') this.emit('battery', { id, value: num(v, 80) });
         }
       }
@@ -114,6 +115,14 @@ export class Store extends Emitter {
     if (data.alarms?.length) this.alarmCatalog = data.alarms;
     this.link = { mode, source: data.source || this.link.source, updated: new Date(), mtime: data.mtime, error: null, warnings: data.warnings };
     this.recompute();
+    this.tick(0, true); // refresh live values right away
+    // Excel-driven stops raise / clear alarms immediately
+    const now = initial ? [...this.items.values()].filter((it) => it.base.status === 'Down') : statusChanged;
+    for (const it of now) {
+      if (it.base.status === 'Down') this.logAlarm(it, it.base.alarmCode || 'E-000', it.base.alarmText || 'Stopped – status set to Down in Excel', 'Major', 'excel');
+      else this.alarms.filter((a) => a.id === it.id && !a.cleared).forEach((a) => { a.cleared = new Date(); this.emit('alarm', a); });
+      this.emit('status', { id: it.id, status: it.live.status });
+    }
     this.emit('link', this.link);
     if (!initial) this.emit('excel', { changes });
     this.emit('change', { ids: [...this.items.keys()] });
@@ -128,8 +137,8 @@ export class Store extends Emitter {
     return 'Running';
   }
 
-  tick(dtReal) {
-    if (this.paused) return;
+  tick(dtReal, force = false) {
+    if (this.paused && !force) return;
     const dt = dtReal * this.simSpeed;
     this.simTime += dt;
     const sim = this.simEnabled;
@@ -171,8 +180,6 @@ export class Store extends Emitter {
       if (!s.reason) { l.alarmCode = b.alarmCode || ''; l.alarmText = b.alarmText || ''; }
       l.oee = (l.availability * l.performance * l.quality) / 10000;
       if (prevStatus !== l.status) this.emit('status', { id: it.id, status: l.status, prev: prevStatus });
-      // sheet-driven alarm (Status = Down with alarm text)
-      if (b.status === 'Down' && prevStatus !== 'Down' && !s.reason) this.logAlarm(it, b.alarmCode || 'E-000', b.alarmText || 'Stopped (set in Excel)', 'Major', 'excel');
     }
     this.histT = (this.histT || 0) + dtReal;
     if (this.histT > 2) {

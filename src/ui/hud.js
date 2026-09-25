@@ -230,11 +230,12 @@ export class Labels {
     const sel = this.app.selection.selected;
     const cam = this.app.engine.camera.position;
     const iso = this.app.selection.envHidden;
+    const fam = iso && sel ? this.app.selection.family(sel) : null;
     for (const [id, L] of this.items) {
       const p = this.app.anchorOf(id);
       L.obj.position.copy(p);
       const d = p.distanceTo(cam);
-      const hiddenEq = this.app.selection.hidden.has(id) || (iso && !this.app.selection.family(sel).has(id));
+      const hiddenEq = this.app.selection.hidden.has(id) || (fam && !fam.has(id));
       const show = !hiddenEq && (id === sel || (this.visible && d < 85));
       L.obj.visible = show;
       if (!show) continue;

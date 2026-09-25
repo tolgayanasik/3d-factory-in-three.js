@@ -49,7 +49,10 @@ export class Selection {
   }
   pick(e) {
     const r = this.engine.renderer.domElement.getBoundingClientRect();
-    this.mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    return this.pickNDC(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  }
+  pickNDC(x, y) {
+    this.mouse.set(x, y);
     this.ray.setFromCamera(this.mouse, this.engine.camera);
     const hits = this.ray.intersectObject(this.ctx.equipmentRoot, true);
     for (const h of hits) {

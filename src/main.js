@@ -123,6 +123,12 @@ class App {
       else if (e.key === '?') this.openHelp();
       else if (e.code === 'Space' && this.nav.mode !== 'walk') { e.preventDefault(); this.togglePause(); }
     });
+    // walk mode: click selects whatever is under the crosshair
+    document.addEventListener('mousedown', (e) => {
+      if (this.nav.mode !== 'walk' || !this.nav.walk.isLocked || e.button !== 0) return;
+      const id = sel.pickNDC(0, 0);
+      if (id) sel.select(id, { source: 'walk' });
+    });
     // walk-mode lock hint
     this.nav.onWalkUnlock = () => {
       const w = $('#walk-hint');
