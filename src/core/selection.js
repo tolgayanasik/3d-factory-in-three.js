@@ -1,7 +1,7 @@
 // Picking (hover/click), and visual modes: highlight, x-ray, isolate, OEE heatmap.
 import * as THREE from 'three';
 
-const ghostMat = new THREE.MeshStandardMaterial({ color: 0x9fb8d0, transparent: true, opacity: 0.07, depthWrite: false, roughness: 1 });
+const ghostMat = new THREE.MeshStandardMaterial({ color: 0x9fc4e8, transparent: true, opacity: 0.16, depthWrite: false, roughness: 1 });
 function isAncestorOf(a, b) { let o = b.parent; while (o) { if (o === a) return true; o = o.parent; } return false; }
 
 export class Selection {

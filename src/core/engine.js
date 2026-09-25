@@ -165,12 +165,12 @@ export class Engine {
     this.sun.position.copy(sd.multiplyScalar(140));
     this.sun.target.position.set(0, 0, 0);
     this.sun.color.setHSL(0.09, 0.35 + warm * 0.4, 0.92 - warm * 0.15);
-    this.sun.intensity = 0.55 + day * 1.75;
-    this.hemi.intensity = 0.4 + day * 0.55;
+    this.sun.intensity = 0.2 + day * 2.1;
+    this.hemi.intensity = 0.18 + day * 0.77;
     this.hemi.color.setHSL(0.6, 0.35, 0.55 + day * 0.35);
-    this.fill.intensity = 0.45 + (1 - day) * 0.55;
+    this.fill.intensity = 0.45 + (1 - day) * 0.25;
     this.fill.color.setHSL(0.1, 0.25, 0.9);
-    this.scene.environmentIntensity = 0.3 + day * 0.3;
+    this.scene.environmentIntensity = 0.15 + day * 0.45;
     this.renderer.toneMappingExposure = 0.9 + day * 0.15;
     this.bloom.strength = 0.4 + (1 - day) * 0.45;
     this.onTimeOfDay?.(1 - day);

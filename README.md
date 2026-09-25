@@ -9,6 +9,8 @@ is running.**
 
 ![overview](docs/overview.png)
 
+![Excel edit pushed live into the twin](docs/excel-live-update.png)
+
 ## Quick start
 
 ```bash
